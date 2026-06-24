@@ -1,0 +1,29 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "./generated"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model Domain {
+  id        Int        @id @default(autoincrement())
+  name      String     @unique
+  locations Location[]
+}
+
+model Location {
+  id       Int    @id @default(autoincrement())
+  host     String
+  port     Int
+  domain   Domain @relation(fields: [domainId], references: [id], onDelete: Cascade)
+  domainId Int
+
+  @@unique([domainId, host, port])
+}

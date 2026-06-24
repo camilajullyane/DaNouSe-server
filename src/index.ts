@@ -1,4 +1,6 @@
-import { DnsService } from "./dns/DnsService.js";
+import { DnsController } from "./controller/DnsController.js";
+import { PrismaDnsRegistryRepository } from "./repository/PrismaDnsRegistryRepository.js";
+import { DnsService } from "./service/DnsService.js";
 import { UdpServer } from "./infra/udp/UdpServer.js";
 
 const registerToken = process.env.DNS_REGISTER_TOKEN;
@@ -7,9 +9,11 @@ if (!registerToken) {
   throw new Error("DNS_REGISTER_TOKEN environment variable is required");
 }
 
-const dnsService = new DnsService({ registerToken });
-const server = new UdpServer((message) => {
-  const response = dnsService.handleMessage(message);
+const registry = new PrismaDnsRegistryRepository();
+const dnsService = new DnsService({ registerToken, registry });
+const dnsController = new DnsController(dnsService);
+const server = new UdpServer(async (message) => {
+  const response = await dnsController.handleMessage(message);
 
   return JSON.stringify(response);
 });

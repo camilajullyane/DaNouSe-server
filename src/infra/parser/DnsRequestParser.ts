@@ -1,9 +1,5 @@
 import net from "node:net";
-import type {
-  DnsParseResult,
-  RegisterDnsRequest,
-  ResolveDnsRequest,
-} from "../types/index.js";
+import type { DnsParseResult, RegisterDnsRequest, ResolveDnsRequest } from "../../types/index.js";
 
 const INVALID_REQUEST_MESSAGE =
   'Invalid request. Use {"action":"register","name":"...","ip":"127.0.0.1","port":3000,"token":"..."} or {"action":"resolve","name":"..."}';
@@ -35,9 +31,7 @@ export class DnsRequestParser {
     }
   }
 
-  private parseRegisterRequest(
-    payload: Record<string, unknown>,
-  ): DnsParseResult {
+  private parseRegisterRequest(payload: Record<string, unknown>): DnsParseResult {
     if (
       typeof payload.name !== "string" ||
       typeof payload.ip !== "string" ||
@@ -102,9 +96,7 @@ export class DnsRequestParser {
   }
 
   private isValidName(name: string): boolean {
-    return /^[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?(\.[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?)*$/.test(
-      name,
-    );
+    return /^[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?(\.[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?)*$/.test(name);
   }
 
   private isObject(value: unknown): value is Record<string, unknown> {

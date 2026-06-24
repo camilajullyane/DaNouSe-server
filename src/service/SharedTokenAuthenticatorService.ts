@@ -1,6 +1,6 @@
 import { timingSafeEqual } from "node:crypto";
 
-export class SharedTokenAuthenticator {
+export class SharedTokenAuthenticatorService {
   constructor(private readonly expectedToken: string) {
     if (!expectedToken) {
       throw new Error("expectedToken is required");
@@ -11,8 +11,6 @@ export class SharedTokenAuthenticator {
     const expected = Buffer.from(this.expectedToken);
     const received = Buffer.from(token);
 
-    return (
-      expected.length === received.length && timingSafeEqual(expected, received)
-    );
+    return expected.length === received.length && timingSafeEqual(expected, received);
   }
 }
