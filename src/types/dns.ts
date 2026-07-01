@@ -3,6 +3,24 @@ export interface LocationEntry {
   port: number;
 }
 
+export interface LocationHealthStatus {
+  healthy: boolean;
+  lastCheckedAt: Date | null;
+  lastSuccessAt: Date | null;
+  failureCount: number;
+}
+
+export interface HealthCheckTarget extends LocationHealthStatus {
+  id: number;
+  ip: string;
+  port: number;
+}
+
+export interface HealthCheckResult {
+  healthy: boolean;
+  checkedAt: Date;
+}
+
 export interface RegistryEntry {
   name: string;
   locations: LocationEntry[];
@@ -20,6 +38,12 @@ export interface DnsServiceOptions {
 export interface DnsRegistryRepository {
   saveLocation(entry: RegisterLocationEntry): Promise<RegistryEntry>;
   findByName(name: string): Promise<RegistryEntry | null>;
+  listHealthCheckTargets(): Promise<HealthCheckTarget[]>;
+  updateLocationHealth(
+    id: number,
+    result: HealthCheckResult,
+    failureThreshold: number,
+  ): Promise<void>;
 }
 
 export interface DnsResponse {
