@@ -19,11 +19,15 @@ model Domain {
 }
 
 model Location {
-  id       Int    @id @default(autoincrement())
-  host     String
-  port     Int
-  domain   Domain @relation(fields: [domainId], references: [id], onDelete: Cascade)
-  domainId Int
+  id            Int       @id @default(autoincrement())
+  host          String
+  port          Int
+  healthy       Boolean   @default(false)
+  lastCheckedAt DateTime?
+  lastSuccessAt DateTime?
+  failureCount  Int       @default(0)
+  domain        Domain    @relation(fields: [domainId], references: [id], onDelete: Cascade)
+  domainId      Int
 
   @@unique([domainId, host, port])
 }

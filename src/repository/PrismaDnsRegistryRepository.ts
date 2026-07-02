@@ -1,5 +1,7 @@
 import type {
   DnsRegistryRepository,
+  HealthCheckResult,
+  HealthCheckTarget,
   RegisterLocationEntry,
   RegistryEntry,
 } from "../types/index.js";
@@ -51,13 +53,87 @@ export class PrismaDnsRegistryRepository implements DnsRegistryRepository {
         name,
       },
       include: {
-        locations: true,
+        locations: {
+          where: {
+            healthy: true,
+          },
+        },
       },
     });
 
     if (!domain) return null;
 
     return this.toRegistryEntry(domain);
+  }
+
+  async listHealthCheckTargets(): Promise<HealthCheckTarget[]> {
+    const locations = await prisma.location.findMany({
+      select: {
+        id: true,
+        host: true,
+        port: true,
+        healthy: true,
+        lastCheckedAt: true,
+        lastSuccessAt: true,
+        failureCount: true,
+      },
+    });
+
+    return locations.map((location) => ({
+      id: location.id,
+      ip: location.host,
+      port: location.port,
+      healthy: location.healthy,
+      lastCheckedAt: location.lastCheckedAt,
+      lastSuccessAt: location.lastSuccessAt,
+      failureCount: location.failureCount,
+    }));
+  }
+
+  async updateLocationHealth(
+    id: number,
+    result: HealthCheckResult,
+    failureThreshold: number,
+  ): Promise<void> {
+    if (result.healthy) {
+      await prisma.location.update({
+        where: {
+          id,
+        },
+        data: {
+          healthy: true,
+          lastCheckedAt: result.checkedAt,
+          lastSuccessAt: result.checkedAt,
+          failureCount: 0,
+        },
+      });
+
+      return;
+    }
+
+    const location = await prisma.location.findUnique({
+      where: {
+        id,
+      },
+      select: {
+        failureCount: true,
+      },
+    });
+
+    if (!location) return;
+
+    const failureCount = location.failureCount + 1;
+
+    await prisma.location.update({
+      where: {
+        id,
+      },
+      data: {
+        lastCheckedAt: result.checkedAt,
+        failureCount,
+        ...(failureCount >= failureThreshold ? { healthy: false } : {}),
+      },
+    });
   }
 
   private toRegistryEntry(domain: {

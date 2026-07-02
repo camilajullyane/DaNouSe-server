@@ -1,0 +1,5 @@
+-- AlterTable
+ALTER TABLE "Location" ADD COLUMN "healthy" BOOLEAN NOT NULL DEFAULT false;
+ALTER TABLE "Location" ADD COLUMN "lastCheckedAt" DATETIME;
+ALTER TABLE "Location" ADD COLUMN "lastSuccessAt" DATETIME;
+ALTER TABLE "Location" ADD COLUMN "failureCount" INTEGER NOT NULL DEFAULT 0;
