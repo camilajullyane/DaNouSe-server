@@ -14,6 +14,13 @@ export class DnsService {
   }
 
   async register(request: RegisterDnsRequest): Promise<DnsResponse> {
+    console.log("[DNS] Register requested:", {
+      name: request.name,
+      ip: request.ip,
+      port: request.port,
+      requestedAt: new Date().toISOString(),
+    });
+
     if (!this.authenticator.isAuthorized(request.token)) {
       return {
         ok: false,
@@ -29,6 +36,13 @@ export class DnsService {
     };
 
     const savedEntry = await this.options.registry.saveLocation(entry);
+
+    console.log("[DNS] Registered service:", {
+      name: entry.name,
+      ip: entry.ip,
+      port: entry.port,
+      registeredAt: new Date().toISOString(),
+    });
 
     return {
       ok: true,
